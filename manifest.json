@@ -1,0 +1,15 @@
+{
+	"manifest_version": 2,
+	"name": "DeezerCord",
+	"description": "Discord Rich Presence integration for Deezer",
+	"version": "0.1.0",
+	"content_scripts": [
+		{
+			"matches": ["*://www.deezer.com/*"],
+			"js": ["deezercord.js"]
+		}
+	],
+	"permissions": [
+		"*://www.deezer.com/*"
+	]
+}
