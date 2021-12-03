@@ -6,10 +6,15 @@
 	"content_scripts": [
 		{
 			"matches": ["*://www.deezer.com/*"],
-			"js": ["deezercord.js"]
+			"js": ["deezerTracker.js"]
+		},
+		{
+			"matches": ["*://discord.com/*"],
+			"js": ["discordTracker.js"]
 		}
 	],
 	"permissions": [
-		"*://www.deezer.com/*"
+		"*://www.deezer.com/*",
+		"*://discord.com/*"
 	]
 }
