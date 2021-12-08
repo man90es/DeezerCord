@@ -1,10 +1,9 @@
-class DeezerCord {
-	static token = null
+/*
+	This script runs on Discord page, extracts the session token
+	and stores it in the extension's non-synced storage
+*/
 
-	static init() {
-		this.token = localStorage.getItem("token")
-		console.log(this.token)
-	}
-}
-
-DeezerCord.init()
+(() => {
+	const token = localStorage.getItem("token")
+	chrome.storage.local.set({ discordToken: token })
+})()

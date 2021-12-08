@@ -1,13 +1,18 @@
-class DeezerCord {
+/*
+	This script runs on Deezer page, watches what songs are played
+	and stores the data in the extension's non-synced storage
+*/
+
+class DeezerTracker {
 	static #initialised = false
 	static #data = {}
 
 	static init() {
-		if (DeezerCord.#initialised) {
+		if (DeezerTracker.#initialised) {
 			return
 		}
 
-		DeezerCord.#initialised = true
+		DeezerTracker.#initialised = true
 
 		const bodyObserver = new MutationObserver((mutationsList, observer) => {
 			if (mutationsList.find((mutation) => {
@@ -15,7 +20,7 @@ class DeezerCord {
 					return node.className === 'track-link' && node.innerText.length > 0
 				})
 			})) {
-				DeezerCord.#startPlayerTracking()
+				DeezerTracker.#startPlayerTracking()
 				observer.disconnect()
 			}
 		})
@@ -27,11 +32,11 @@ class DeezerCord {
 	}
 
 	static async #startPlayerTracking() {
-		Object.assign(DeezerCord.#data, await DeezerCord.#scrapePause(), await DeezerCord.#scrapeSong(), { updatedAt: +new Date() })
+		Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapePause(), await DeezerTracker.#scrapeSong(), { updatedAt: +new Date() })
 
 		const pauseObserver = new MutationObserver(async (mutationsList, observer) => {
-			Object.assign(DeezerCord.#data, await DeezerCord.#scrapePause(), { updatedAt: +new Date() })
-			console.log(DeezerCord.#data)
+			Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapePause(), { updatedAt: +new Date() })
+			DeezerTracker.#upsyncData()
 		})
 
 		pauseObserver.observe(
@@ -40,8 +45,8 @@ class DeezerCord {
 		)
 
 		const songObserver = new MutationObserver(async (mutationsList, observer) => {
-			Object.assign(DeezerCord.#data, await DeezerCord.#scrapeSong(), { updatedAt: +new Date() })
-			console.log(DeezerCord.#data)
+			Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapeSong(), { updatedAt: +new Date() })
+			DeezerTracker.#upsyncData()
 		})
 
 		songObserver.observe(
@@ -84,6 +89,10 @@ class DeezerCord {
 			length: length,
 		}
 	}
+
+	static #upsyncData() {
+		chrome.storage.local.set({ deezerData: DeezerTracker.#data })
+	}
 }
 
-DeezerCord.init()
+DeezerTracker.init()

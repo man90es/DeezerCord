@@ -13,7 +13,11 @@
 			"js": ["discordTracker.js"]
 		}
 	],
+	"background": {
+		"scripts": ["background.js"]
+	},
 	"permissions": [
+		"storage",
 		"*://www.deezer.com/*",
 		"*://discord.com/*"
 	]
