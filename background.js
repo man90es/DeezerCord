@@ -34,7 +34,9 @@ class DeezerCord {
 				}
 			}
 		})
+	}
 
+	static #openWS() {
 		// Initialise a websocket connection to Deezer
 		DeezerCord.#ws = new WebSocket("wss://gateway.discord.gg/?v=6&encoding=json")
 		DeezerCord.#ws.onopen = () => {
@@ -51,6 +53,10 @@ class DeezerCord {
 
 	static #setDeezerStatus(status) {
 		DeezerCord.#deezerStatus = status
+
+		if (DeezerCord.#ws === null) {
+			DeezerCord.#openWS()
+		}
 	}
 
 	static #setHeartbeatInterval(interval) {
