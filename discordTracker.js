@@ -4,6 +4,6 @@
 */
 
 (() => {
-	const token = localStorage.getItem("token")
+	const token = localStorage.getItem("token").replaceAll("\"", "")
 	chrome.storage.local.set({ discordToken: token })
 })()
