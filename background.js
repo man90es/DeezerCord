@@ -13,10 +13,11 @@ class Utils {
 }
 
 class DeezerCord {
-	static #heartbeatInterval = 41250
+	static #heartbeatInterval = null
 	static #discordToken = null
 	static #deezerStatus = null
 	static #ws = null
+	static #lastSeq = null
 
 	static init() {
 		// Initialise Discord token if it was set in a previous session
@@ -37,30 +38,46 @@ class DeezerCord {
 	}
 
 	static #openWS() {
+		if (DeezerCord.#heartbeatInterval !== null) {
+			clearInterval(DeezerCord.#heartbeatInterval)
+			DeezerCord.#heartbeatInterval = null
+		}
+
 		// Initialise a websocket connection to Deezer
 		DeezerCord.#ws = new WebSocket("wss://gateway.discord.gg/?v=6&encoding=json")
 		DeezerCord.#ws.onopen = () => {
+			console.log("Connection open")
 			DeezerCord.#send(DeezerCord.#generateOpIdentifyPayload())
 		}
 		DeezerCord.#ws.onmessage = (e) => {
 			DeezerCord.#handleMessage(e.data)
 		}
+		DeezerCord.#ws.onclose = (e) => {
+			console.log("Connection closed", e)
+		}
 	}
 
 	static #setDiscordToken(token) {
 		DeezerCord.#discordToken = token
-	}
 
-	static #setDeezerStatus(status) {
-		DeezerCord.#deezerStatus = status
-
-		if (DeezerCord.#ws === null) {
+		if (token) {
 			DeezerCord.#openWS()
 		}
 	}
 
+	static #setDeezerStatus(status) {
+		DeezerCord.#deezerStatus = status
+		DeezerCord.#send(DeezerCord.#generateOpPresenceUpdatePayload())
+	}
+
 	static #setHeartbeatInterval(interval) {
-		DeezerCord.#heartbeatInterval = interval
+		if (DeezerCord.#heartbeatInterval !== null) {
+			clearInterval(DeezerCord.#heartbeatInterval)
+		}
+
+		DeezerCord.#heartbeatInterval = setInterval(() => {
+			DeezerCord.#send(DeezerCord.#generateOpHeartbeatPayload())
+		}, interval)
 	}
 
 	static #send(payload) {
@@ -69,12 +86,22 @@ class DeezerCord {
 
 	static #handleMessage(message) {
 		const msg = JSON.parse(message)
+		DeezerCord.#lastSeq = msg.s
 
-		if (msg.op === 10) {
-			DeezerCord.#setHeartbeatInterval(msg.d.heartbeat_interval)
-		} else {
-			console.log(msg)
+		switch (msg.op) {
+			case 1: // "Heartbeat"
+				DeezerCord.#send(DeezerCord.#generateOpHeartbeatPayload())
+				break
+
+			case 9: // "Invalid Session"
+				DeezerCord.#send(DeezerCord.#generateOpIdentifyPayload())
+				break
+
+			case 10: // "Hello"
+				DeezerCord.#setHeartbeatInterval(msg.d.heartbeat_interval)
+				break
 		}
+
 	}
 
 	static #generatePresenceStatus() {
@@ -94,6 +121,13 @@ class DeezerCord {
 		}
 	}
 
+	static #generateOpHeartbeatPayload() {
+		return {
+			op: 1, // "Heartbeat"
+			d: DeezerCord.#lastSeq,
+		}
+	}
+
 	static #generateOpIdentifyPayload() {
 		return {
 			op: 2, // "Identify"
@@ -109,6 +143,13 @@ class DeezerCord {
 				presence: DeezerCord.#generatePresenceStatus(),
 			}
 		}
+	}
+
+	static #generateOpPresenceUpdatePayload() {
+		return {
+			op: 3, // "Presence Update"
+			d: DeezerCord.#generatePresenceStatus(),
+		};
 	}
 }
 
