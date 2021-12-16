@@ -105,7 +105,9 @@ class DeezerCord {
 	}
 
 	static #generatePresenceStatus() {
-		const game = DeezerCord.#deezerStatus === null ? null : {
+		const noStatus = DeezerCord.#deezerStatus === null || DeezerCord.#deezerStatus.paused
+
+		const game = noStatus ? null : {
 			name:     "Deezer",
 			type:     2, // "Listening to"
 			details:  DeezerCord.#deezerStatus.song,
