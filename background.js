@@ -117,15 +117,19 @@ class DeezerCord {
 			const ends = Utils.timeStringToSeconds(DeezerCord.#deezerStatus.length) - started
 
 			game = {
-				name:     "Deezer",
-				type:     2, // "Listening to"
-				details:  DeezerCord.#deezerStatus.song,
-				state:    "by " + DeezerCord.#deezerStatus.artist,
-				instance: false,
+				name:           "Deezer",
+				application_id: "847124807401340958",
+				type:           2, // "Listening to"
+				details:        DeezerCord.#deezerStatus.song,
+				state:          "by " + DeezerCord.#deezerStatus.artist,
+				instance:       false,
+				assets: {
+					large_image: "847129160992292925",
+				},
 				timestamps: {
 					start: DeezerCord.#deezerStatus.updatedAt - started * 1e3,
-					end: DeezerCord.#deezerStatus.updatedAt + ends * 1e3,
-				}
+					end:   DeezerCord.#deezerStatus.updatedAt + ends * 1e3,
+				},
 			}
 		}
 
