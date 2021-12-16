@@ -112,7 +112,7 @@ class DeezerCord {
 	static #generatePresenceStatus() {
 		let game = null
 
-		if (DeezerCord.#deezerStatus !== null && !DeezerCord.#deezerStatus.paused) {
+		if (DeezerCord.#deezerStatus !== null) {
 			const started = Utils.timeStringToSeconds(DeezerCord.#deezerStatus.time)
 			const ends = Utils.timeStringToSeconds(DeezerCord.#deezerStatus.length) - started
 
@@ -125,6 +125,8 @@ class DeezerCord {
 				instance:       false,
 				assets: {
 					large_image: "847129160992292925",
+					small_image: DeezerCord.#deezerStatus.paused ? "921025520014094396" : null,
+					small_text:  "Paused",
 				},
 				timestamps: {
 					start: DeezerCord.#deezerStatus.updatedAt - started * 1e3,
