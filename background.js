@@ -10,6 +10,11 @@ class Utils {
 	static getDeviceName() {
 		return "DeezerCord"
 	}
+
+	static timeStringToSeconds(str) {
+		const [minutes, seconds] = str.split(":")
+		return parseInt(minutes) * 60 + parseInt(seconds)
+	}
 }
 
 class DeezerCord {
@@ -44,7 +49,7 @@ class DeezerCord {
 		}
 
 		// Initialise a websocket connection to Deezer
-		DeezerCord.#ws = new WebSocket("wss://gateway.discord.gg/?v=6&encoding=json")
+		DeezerCord.#ws = new WebSocket("wss://gateway.discord.gg/?v=9&encoding=json")
 		DeezerCord.#ws.onopen = () => {
 			console.log("Connection open")
 			DeezerCord.#send(DeezerCord.#generateOpIdentifyPayload())
@@ -105,14 +110,23 @@ class DeezerCord {
 	}
 
 	static #generatePresenceStatus() {
-		const noStatus = DeezerCord.#deezerStatus === null || DeezerCord.#deezerStatus.paused
+		let game = null
 
-		const game = noStatus ? null : {
-			name:     "Deezer",
-			type:     2, // "Listening to"
-			details:  DeezerCord.#deezerStatus.song,
-			state:    "by " + DeezerCord.#deezerStatus.artist,
-			instance: false,
+		if (DeezerCord.#deezerStatus !== null && !DeezerCord.#deezerStatus.paused) {
+			const started = Utils.timeStringToSeconds(DeezerCord.#deezerStatus.time)
+			const ends = Utils.timeStringToSeconds(DeezerCord.#deezerStatus.length) - started
+
+			game = {
+				name:     "Deezer",
+				type:     2, // "Listening to"
+				details:  DeezerCord.#deezerStatus.song,
+				state:    "by " + DeezerCord.#deezerStatus.artist,
+				instance: false,
+				timestamps: {
+					start: DeezerCord.#deezerStatus.updatedAt - started * 1e3,
+					end: DeezerCord.#deezerStatus.updatedAt + ends * 1e3,
+				}
+			}
 		}
 
 		return {
