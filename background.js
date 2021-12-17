@@ -52,7 +52,7 @@ class DeezerCord {
 		DeezerCord.#ws = new WebSocket("wss://gateway.discord.gg/?v=9&encoding=json")
 		DeezerCord.#ws.onopen = () => {
 			console.log("Connection open")
-			DeezerCord.#send(DeezerCord.#generateOpIdentifyPayload())
+			DeezerCord.#sendOpIdentifyPayload()
 		}
 		DeezerCord.#ws.onmessage = (e) => {
 			DeezerCord.#handleMessage(e.data)
@@ -72,7 +72,7 @@ class DeezerCord {
 
 	static #setDeezerStatus(status) {
 		DeezerCord.#deezerStatus = status
-		DeezerCord.#send(DeezerCord.#generateOpPresenceUpdatePayload())
+		DeezerCord.#sendOpPresenceUpdatePayload()
 	}
 
 	static #setHeartbeatInterval(interval) {
@@ -81,12 +81,8 @@ class DeezerCord {
 		}
 
 		DeezerCord.#heartbeatInterval = setInterval(() => {
-			DeezerCord.#send(DeezerCord.#generateOpHeartbeatPayload())
+			DeezerCord.#sendOpHeartbeatPayload()
 		}, interval)
-	}
-
-	static #send(payload) {
-		DeezerCord.#ws.send(JSON.stringify(payload))
 	}
 
 	static #handleMessage(message) {
@@ -95,11 +91,11 @@ class DeezerCord {
 
 		switch (msg.op) {
 			case 1: // "Heartbeat"
-				DeezerCord.#send(DeezerCord.#generateOpHeartbeatPayload())
+				DeezerCord.#sendOpHeartbeatPayload()
 				break
 
 			case 9: // "Invalid Session"
-				DeezerCord.#send(DeezerCord.#generateOpIdentifyPayload())
+				DeezerCord.#sendOpIdentifyPayload()
 				break
 
 			case 10: // "Hello"
@@ -143,15 +139,17 @@ class DeezerCord {
 		}
 	}
 
-	static #generateOpHeartbeatPayload() {
-		return {
+	static #sendOpHeartbeatPayload() {
+		const payload = {
 			op: 1, // "Heartbeat"
 			d: DeezerCord.#lastSeq,
 		}
+
+		DeezerCord.#ws.send(JSON.stringify(payload))
 	}
 
-	static #generateOpIdentifyPayload() {
-		return {
+	static #sendOpIdentifyPayload() {
+		const payload = {
 			op: 2, // "Identify"
 			d: {
 				token: DeezerCord.#discordToken,
@@ -165,13 +163,17 @@ class DeezerCord {
 				presence: DeezerCord.#generatePresenceStatus(),
 			}
 		}
+
+		DeezerCord.#ws.send(JSON.stringify(payload))
 	}
 
-	static #generateOpPresenceUpdatePayload() {
-		return {
+	static #sendOpPresenceUpdatePayload() {
+		const payload = {
 			op: 3, // "Presence Update"
 			d: DeezerCord.#generatePresenceStatus(),
-		};
+		}
+
+		DeezerCord.#ws.send(JSON.stringify(payload))
 	}
 }
 
