@@ -4,16 +4,9 @@
 */
 
 class DeezerTracker {
-	static #initialised = false
 	static #data = {}
 
 	static init() {
-		if (DeezerTracker.#initialised) {
-			return
-		}
-
-		DeezerTracker.#initialised = true
-
 		const bodyObserver = new MutationObserver((mutationsList, observer) => {
 			if (mutationsList.find((mutation) => {
 				return [...mutation.addedNodes].find((node) => {
@@ -29,6 +22,13 @@ class DeezerTracker {
 			document.querySelector("body"),
 			{ characterData: false, attributes: false, childList: true, subtree: true }
 		)
+
+		window.onbeforeunload = () => {
+			if (DeezerTracker.#data !== null) {
+				DeezerTracker.#data = null
+				DeezerTracker.#upsyncData()
+			}
+		}
 	}
 
 	static async #startPlayerTracking() {
