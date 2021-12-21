@@ -43,9 +43,16 @@ class DeezerCord {
 	}
 
 	static #openWS() {
+		// Clear hearbeat interval if it's set
 		if (DeezerCord.#heartbeatInterval !== null) {
 			clearInterval(DeezerCord.#heartbeatInterval)
 			DeezerCord.#heartbeatInterval = null
+		}
+
+		// Close previous connection if it's not closed
+		if (DeezerCord.#ws?.readyState < 2) {
+			DeezerCord.#ws.onclose = () => false
+			DeezerCord.#ws.close()
 		}
 
 		// Initialise a websocket connection to Deezer
@@ -58,7 +65,9 @@ class DeezerCord {
 			DeezerCord.#handleMessage(e.data)
 		}
 		DeezerCord.#ws.onclose = (e) => {
-			console.log("Connection closed", e)
+			console.log("Connection closed for reason:", e.reason)
+			console.log("Trying to reconnect...")
+			DeezerCord.#openWS()
 		}
 	}
 
