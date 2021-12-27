@@ -12,6 +12,7 @@ class Utils {
 	}
 
 	static timeStringToSeconds(str) {
+		str ??= "00:00"
 		const [minutes, seconds] = str.split(":")
 		return parseInt(minutes) * 60 + parseInt(seconds)
 	}

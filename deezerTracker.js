@@ -10,7 +10,7 @@ class DeezerTracker {
 		const bodyObserver = new MutationObserver((mutationsList, observer) => {
 			if (mutationsList.find((mutation) => {
 				return [...mutation.addedNodes].find((node) => {
-					return node.className === 'track-link' && node.innerText.length > 0
+					return node.className === "track-link" && node.innerText.length > 0
 				})
 			})) {
 				DeezerTracker.#startPlayerTracking()
@@ -34,7 +34,7 @@ class DeezerTracker {
 	static async #startPlayerTracking() {
 		Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapePause(), await DeezerTracker.#scrapeSong(), { updatedAt: +new Date() })
 
-		const pauseObserver = new MutationObserver(async (mutationsList, observer) => {
+		const pauseObserver = new MutationObserver(async () => {
 			Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapePause(), { updatedAt: +new Date() })
 			DeezerTracker.#upsyncData()
 		})
@@ -44,7 +44,7 @@ class DeezerTracker {
 			{ characterData: false, attributes: true, childList: false, subtree: false }
 		)
 
-		const songObserver = new MutationObserver(async (mutationsList, observer) => {
+		const songObserver = new MutationObserver(async () => {
 			Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapeSong(), { updatedAt: +new Date() })
 			DeezerTracker.#upsyncData()
 		})
@@ -53,6 +53,13 @@ class DeezerTracker {
 			document.querySelector(".marquee-content .track-link:first-child"),
 			{ characterData: true, attributes: false, childList: false, subtree: true }
 		)
+
+		setTimeout(async () => {
+			Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapePause(), await DeezerTracker.#scrapeSong(), { updatedAt: +new Date() })
+			if (!DeezerTracker.#data.paused) {
+				DeezerTracker.#upsyncData()
+			}
+		}, 3e3)
 	}
 
 	static async #scrapePause() {
