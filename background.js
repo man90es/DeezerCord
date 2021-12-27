@@ -92,6 +92,11 @@ class DeezerCord {
 
 		DeezerCord.#heartbeatInterval = setInterval(() => {
 			DeezerCord.#sendOpHeartbeatPayload()
+
+			// If more than a minute on pause, clear status
+			if (DeezerCord.#deezerStatus?.paused && +new Date() - DeezerCord.#deezerStatus?.updatedAt > 6e4) {
+				DeezerCord.#setDeezerStatus(null)
+			}
 		}, interval)
 	}
 
