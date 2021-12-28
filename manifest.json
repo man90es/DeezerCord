@@ -20,5 +20,9 @@
 		"storage",
 		"*://www.deezer.com/*",
 		"*://discord.com/*"
-	]
+	],
+	"icons": {
+		"48": "assets/icon48.png",
+		"128": "assets/icon128.png"
+	}
 }
