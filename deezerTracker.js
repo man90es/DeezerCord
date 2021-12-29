@@ -7,6 +7,7 @@ class DeezerTracker {
 	static #data = {}
 
 	static init() {
+		// wait for song title to appear before starting to scrape
 		const bodyObserver = new MutationObserver((mutationsList, observer) => {
 			if (mutationsList.find((mutation) => {
 				return [...mutation.addedNodes].find((node) => {
@@ -23,6 +24,7 @@ class DeezerTracker {
 			{ characterData: false, attributes: false, childList: true, subtree: true }
 		)
 
+		// Clear status before closing the tab
 		window.onbeforeunload = () => {
 			if (DeezerTracker.#data !== null) {
 				DeezerTracker.#data = null
@@ -32,8 +34,10 @@ class DeezerTracker {
 	}
 
 	static async #startPlayerTracking() {
+		// Scrape initial data
 		Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapePause(), await DeezerTracker.#scrapeSong(), { updatedAt: +new Date() })
 
+		// Observe pause state change and run the scraper
 		const pauseObserver = new MutationObserver(async () => {
 			Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapePause(), { updatedAt: +new Date() })
 			DeezerTracker.#upsyncData()
@@ -44,6 +48,7 @@ class DeezerTracker {
 			{ characterData: false, attributes: true, childList: false, subtree: false }
 		)
 
+		// Observe song title change and run the scraper
 		const songObserver = new MutationObserver(async () => {
 			Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapeSong(), { updatedAt: +new Date() })
 			DeezerTracker.#upsyncData()
@@ -54,6 +59,7 @@ class DeezerTracker {
 			{ characterData: true, attributes: false, childList: false, subtree: true }
 		)
 
+		// Scrape data after a short delay after song name appears
 		setTimeout(async () => {
 			Object.assign(DeezerTracker.#data, await DeezerTracker.#scrapePause(), await DeezerTracker.#scrapeSong(), { updatedAt: +new Date() })
 			if (!DeezerTracker.#data.paused) {
@@ -62,6 +68,7 @@ class DeezerTracker {
 		}, 3e3)
 	}
 
+	// Get paused state and current time from the page
 	static async #scrapePause() {
 		return {
 			paused: "Pause" !== document.querySelector(".svg-icon-group-btn.is-highlight").ariaLabel,
@@ -69,6 +76,7 @@ class DeezerTracker {
 		}
 	}
 
+	// Get song title, artist name, album title and song length from the page
 	static async #scrapeSong() {
 		const albumId = document.querySelector(".marquee-content .track-link:first-child").href.split("/").pop()
 		const album = await fetch(`https://api.deezer.com/album/${albumId}`)
@@ -97,6 +105,7 @@ class DeezerTracker {
 		}
 	}
 
+	// Copy scraped data to the extension's non-synced storage
 	static #upsyncData() {
 		chrome.storage.local.set({ deezerData: DeezerTracker.#data })
 	}

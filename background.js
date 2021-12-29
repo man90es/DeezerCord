@@ -1,3 +1,9 @@
+/*
+	This script runs in the background,
+	receives data from Discord and Deezer
+	and uploads the current presence status to Deezer
+*/
+
 class Utils {
 	static getPlatformName() {
 		return navigator?.userAgentData?.platform || navigator?.platform || "Unknown"
@@ -72,6 +78,7 @@ class DeezerCord {
 		}
 	}
 
+	// Update used token
 	static #setDiscordToken(token) {
 		DeezerCord.#discordToken = token
 
@@ -80,11 +87,14 @@ class DeezerCord {
 		}
 	}
 
+	// Update presence status
 	static #setDeezerStatus(status) {
 		DeezerCord.#deezerStatus = status
 		DeezerCord.#sendOpPresenceUpdatePayload()
 	}
 
+	// Discord servers requires a heartbeat signal
+	// to be sent each n seconds
 	static #setHeartbeatInterval(interval) {
 		if (DeezerCord.#heartbeatInterval !== null) {
 			clearInterval(DeezerCord.#heartbeatInterval)
@@ -93,19 +103,20 @@ class DeezerCord {
 		DeezerCord.#heartbeatInterval = setInterval(() => {
 			DeezerCord.#sendOpHeartbeatPayload()
 
-			// If more than a minute on pause, clear status
+			// If more than a minute on pause, clear presence status
 			if (DeezerCord.#deezerStatus?.paused && +new Date() - DeezerCord.#deezerStatus?.updatedAt > 6e4) {
 				DeezerCord.#setDeezerStatus(null)
 			}
 		}, interval)
 	}
 
+	// Decode and handle messages from Discord
 	static #handleMessage(message) {
 		const msg = JSON.parse(message)
 		DeezerCord.#lastSeq = msg.s
 
 		switch (msg.op) {
-			case 1: // "Heartbeat"
+			case 1: // Extra heartbeat request
 				DeezerCord.#sendOpHeartbeatPayload()
 				break
 
@@ -120,6 +131,8 @@ class DeezerCord {
 
 	}
 
+	// Transform data received from Discord into
+	// something Discord can understand and send it
 	static #generatePresenceStatus() {
 		let game = null
 
@@ -133,7 +146,7 @@ class DeezerCord {
 				type:           2, // "Listening to"
 				details:        DeezerCord.#deezerStatus.song,
 				state:          "by " + DeezerCord.#deezerStatus.artist,
-				instance:       false,
+				instance:       false, // TODO: find out what it's for
 				assets: {
 					large_image: "847129160992292925",
 					small_image: DeezerCord.#deezerStatus.paused ? "921025520014094396" : null,
@@ -149,11 +162,12 @@ class DeezerCord {
 		return {
 			game,
 			status: "online",
-			since: null,
-			afk: false,
+			since:  null,
+			afk:    false,
 		}
 	}
 
+	// Generate a heartbeat signal and send it
 	static #sendOpHeartbeatPayload() {
 		const payload = {
 			op: 1, // "Heartbeat"
@@ -163,6 +177,7 @@ class DeezerCord {
 		DeezerCord.#ws.send(JSON.stringify(payload))
 	}
 
+	// Generate an authentication payload and send it
 	static #sendOpIdentifyPayload() {
 		const payload = {
 			op: 2, // "Identify"
@@ -173,15 +188,16 @@ class DeezerCord {
 					$browser: Utils.getBrowserName(),
 					$device:  Utils.getDeviceName(),
 				},
-				compress: false,
+				compress:        false,
 				large_threshold: 50,
-				presence: DeezerCord.#generatePresenceStatus(),
+				presence:        DeezerCord.#generatePresenceStatus(),
 			}
 		}
 
 		DeezerCord.#ws.send(JSON.stringify(payload))
 	}
 
+	// Generate a presence update payload and send it
 	static #sendOpPresenceUpdatePayload() {
 		const payload = {
 			op: 3, // "Presence Update"
