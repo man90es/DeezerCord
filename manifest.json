@@ -5,11 +5,11 @@
 	"version": "0.1.0",
 	"content_scripts": [
 		{
-			"matches": ["*://www.deezer.com/*"],
+			"matches": ["https://www.deezer.com/*"],
 			"js": ["deezerTracker.js"]
 		},
 		{
-			"matches": ["*://discord.com/*"],
+			"matches": ["https://discord.com/*"],
 			"js": ["discordTracker.js"]
 		}
 	],
@@ -18,8 +18,8 @@
 	},
 	"permissions": [
 		"storage",
-		"*://www.deezer.com/*",
-		"*://discord.com/*"
+		"https://www.deezer.com/*",
+		"https://discord.com/*"
 	],
 	"icons": {
 		"48": "assets/icon48.png",
