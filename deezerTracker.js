@@ -71,7 +71,7 @@ class DeezerTracker {
 	// Get paused state and current time from the page
 	static async #scrapePause() {
 		return {
-			paused: "Pause" !== document.querySelector(".svg-icon-group-btn.is-highlight").ariaLabel,
+			paused: "m5 2 18 10L5 22V2z" === document.querySelector(".svg-icon-group-btn.is-highlight path").d,
 			time:   document.querySelector(".slider-counter.slider-counter-current").innerText,
 		}
 	}
