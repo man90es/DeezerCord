@@ -7,7 +7,7 @@ class DeezerTracker {
 	static #data = {}
 
 	static init() {
-		// wait for song title to appear before starting to scrape
+		// Wait for song title to appear before starting to scrape
 		const bodyObserver = new MutationObserver((mutationsList, observer) => {
 			if (mutationsList.find((mutation) => {
 				return [...mutation.addedNodes].find((node) => {
@@ -72,7 +72,7 @@ class DeezerTracker {
 	static async #scrapePause() {
 		return {
 			paused: "m5 2 18 10L5 22V2z" === document.querySelector(".svg-icon-group-btn.is-highlight path").getAttribute("d"),
-			time:   document.querySelector(".slider-counter.slider-counter-current").innerText,
+			time: document.querySelector(".slider-counter.slider-counter-current").innerText,
 		}
 	}
 
@@ -98,9 +98,9 @@ class DeezerTracker {
 		})()
 
 		return {
-			song:   document.querySelector(".marquee-content .track-link:first-child").innerText,
+			song: document.querySelector(".marquee-content .track-link:first-child").innerText,
 			artist: document.querySelector(".marquee-content .track-link:last-child").innerText,
-			album:  album.title,
+			album: album.title,
 			length: length,
 		}
 	}

@@ -141,20 +141,20 @@ class DeezerCord {
 			const ends = Utils.timeStringToSeconds(DeezerCord.#deezerStatus.length) - started
 
 			game = {
-				name:           "Deezer",
+				name: "Deezer",
 				application_id: "847124807401340958",
-				type:           2, // "Listening to"
-				details:        DeezerCord.#deezerStatus.song,
-				state:          "by " + DeezerCord.#deezerStatus.artist,
-				instance:       false, // TODO: find out what it's for
+				type: 2, // "Listening to"
+				details: DeezerCord.#deezerStatus.song,
+				state: "by " + DeezerCord.#deezerStatus.artist,
+				instance: false, // TODO: find out what it's for
 				assets: {
 					large_image: "847129160992292925",
 					small_image: DeezerCord.#deezerStatus.paused ? "921025520014094396" : null,
-					small_text:  "Paused",
+					small_text: "Paused",
 				},
 				timestamps: {
 					start: DeezerCord.#deezerStatus.updatedAt - started * 1e3,
-					end:   DeezerCord.#deezerStatus.updatedAt + ends * 1e3,
+					end: DeezerCord.#deezerStatus.updatedAt + ends * 1e3,
 				},
 			}
 		}
@@ -162,8 +162,8 @@ class DeezerCord {
 		return {
 			game,
 			status: "online",
-			since:  null,
-			afk:    false,
+			since: null,
+			afk: false,
 		}
 	}
 
@@ -184,13 +184,13 @@ class DeezerCord {
 			d: {
 				token: DeezerCord.#discordToken,
 				properties: {
-					$os:      Utils.getPlatformName(),
+					$os: Utils.getPlatformName(),
 					$browser: Utils.getBrowserName(),
-					$device:  Utils.getDeviceName(),
+					$device: Utils.getDeviceName(),
 				},
-				compress:        false,
+				compress: false,
 				large_threshold: 50,
-				presence:        DeezerCord.#generatePresenceStatus(),
+				presence: DeezerCord.#generatePresenceStatus(),
 			}
 		}
 
